@@ -77,7 +77,7 @@ git push origin submit/dimas-dwi-ariyanto
 ### Langkah 6: Buka Pull Request (PR)
 1. Buka repo hasil fork-mu di browser: `https://github.com/<username-kamu>/Substitution-MobileDev`
 2. Klik tombol hijau **Compare & pull request** (atau buka tab **Pull requests** -> **New pull request**).
-3. **Judul PR** (Tinggal copy-paste format di bawah ini, ganti nama kamu):
+3. **Judul PR** (Salin format di bawah ini ke kolom judul/title PR):
    ```text
    Submission Capstone - <Nama Lengkap Kamu>
    ```
@@ -85,7 +85,28 @@ git push origin submit/dimas-dwi-ariyanto
    ```text
    Submission Capstone - Dimas Dwi Ariyanto
    ```
-4. Di kotak deskripsi, formulir template akan muncul otomatis. Cukup isi data diri kamu (Nama, Email, dsb).
+4. **Isi Deskripsi / Body PR** (Jika kolom deskripsi kosong atau ingin isi ulang, salin template ini):
+   ```markdown
+   ### Data Peserta & Proyek
+   * **Nama Lengkap**: <Nama Lengkap Kamu>
+   * **Username GitHub**: @<username-kamu>
+   * **URL Repo Pribadi LuminaWalls**: https://github.com/<username-kamu>/luminawalls
+   * **Path Submodule di PR ini**: `submissions/<nama-lengkap-kamu>`
+
+   ### Catatan / Pesan Kesan (Opsional)
+   (Tulis cerita singkat, tantangan, atau kesan pesan kamu selama mengikuti Study Jam ini)
+   ```
+   *Contoh pengisian:*
+   ```markdown
+   ### Data Peserta & Proyek
+   * **Nama Lengkap**: Dimas Dwi Ariyanto
+   * **Username GitHub**: @pavelc4
+   * **URL Repo Pribadi LuminaWalls**: https://github.com/pavelc4/luminawalls
+   * **Path Submodule di PR ini**: `submissions/dimas-dwi-ariyanto`
+
+   ### Catatan / Pesan Kesan (Opsional)
+   Aplikasi berhasil dibuat dari nol menggunakan Jetpack Compose!
+   ```
 5. Klik **Create pull request**. Selesai! 🎉
 
 > [!NOTE]
