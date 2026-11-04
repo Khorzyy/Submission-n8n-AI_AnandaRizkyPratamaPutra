@@ -1,0 +1,26 @@
+# Python artifacts & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments & dependencies
+.venv/
+venv/
+env/
+node_modules/
+
+# Test scripts & mock payloads
+*test*.json
+*mock*.json
+*.tmp
+*.temp
+
+# IDEs & OS junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
