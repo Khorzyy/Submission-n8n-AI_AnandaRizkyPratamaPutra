@@ -85,28 +85,7 @@ git push origin submit/dimas-dwi-ariyanto
    ```text
    Submission Capstone - Dimas Dwi Ariyanto
    ```
-4. **Isi Deskripsi / Body PR** (Jika kolom deskripsi kosong atau ingin isi ulang, salin template ini):
-   ```markdown
-   ### Data Peserta & Proyek
-   * **Nama Lengkap**: <Nama Lengkap Kamu>
-   * **Username GitHub**: @<username-kamu>
-   * **URL Repo Pribadi LuminaWalls**: https://github.com/<username-kamu>/luminawalls
-   * **Path Submodule di PR ini**: `submissions/<nama-lengkap-kamu>`
-
-   ### Catatan / Pesan Kesan (Opsional)
-   (Tulis cerita singkat, tantangan, atau kesan pesan kamu selama mengikuti Study Jam ini)
-   ```
-   *Contoh pengisian:*
-   ```markdown
-   ### Data Peserta & Proyek
-   * **Nama Lengkap**: Dimas Dwi Ariyanto
-   * **Username GitHub**: @pavelc4
-   * **URL Repo Pribadi LuminaWalls**: https://github.com/pavelc4/luminawalls
-   * **Path Submodule di PR ini**: `submissions/dimas-dwi-ariyanto`
-
-   ### Catatan / Pesan Kesan (Opsional)
-   Aplikasi berhasil dibuat dari nol menggunakan Jetpack Compose!
-   ```
+4. **Deskripsi PR**: Kotak deskripsi sudah otomatis terisi formulir data diri dari sistem. Kamu cukup melengkapi data kamu (Nama, Username, Email, dan link repo).
 5. Klik **Create pull request**. Selesai! 🎉
 
 > [!NOTE]
