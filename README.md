@@ -1,10 +1,6 @@
 <p align="center">
   <h1 align="center">GDG On Widyatama - Mobile Dev Submissions</h1>
   <p align="center">
-    <strong>Google Developer Group On Widyatama University</strong><br>
-    Portal Resmi Pengumpulan Tugas Akhir - Study Jam Mobile Development (Android / Jetpack Compose)
-  </p>
-  <p align="center">
     <img src="https://img.shields.io/badge/Android-Jetpack%20Compose-3DDC84?style=for-the-badge&logo=android&logoColor=white&labelColor=222" alt="Android Jetpack Compose">
     <img src="https://img.shields.io/badge/Kotlin-2.0+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white&labelColor=222" alt="Kotlin">
     <a href="https://github.com/gdgocwidyatama/Substitution-MobileDev/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-34A853?style=for-the-badge&logo=github&logoColor=white&labelColor=222" alt="PRs Welcome"></a>
