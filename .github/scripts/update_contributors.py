@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Auto-update CONTRIBUTORS.md table when a Capstone PR is merged.
+"""Auto-update CONTRIBUTORS.md table when an n8n Study Jam submission PR is merged.
 
-This script parses .gitmodules and the submissions/ folder to dynamically maintain
+This script parses the submissions/ folder to dynamically maintain
 a sequential, verified, and conflict-free contributor directory in CONTRIBUTORS.md.
 
 Architect & Infrastructure:
-- Dimas Dwi Ariyanto (@pavelc4) - Tech Team (Mobile Development) & Infrastructure Architect
-- Tech Team GDG On Widyatama University
+- Dyaksa (@xdyaksa) - Tech Team & Study Jam Lead (https://github.com/xdyaksa)
+- Tech Team GDG on Campus Universitas Widyatama (https://github.com/gdgocwidyatama)
 """
 
 from __future__ import annotations
@@ -31,7 +31,9 @@ class Contributor:
     @property
     def user_link(self) -> str:
         """Formats the username into a clean markdown link."""
-        if self.username.startswith("[@"):
+        if not self.username or self.username.strip() == "-":
+            return "-"
+        if self.username.startswith("[@") or (self.username.startswith("[") and "github.com" in self.username):
             return self.username
         clean = self.username.strip().lstrip("@")
         return f"[@{clean}](https://github.com/{clean})" if clean else "-"
@@ -102,7 +104,7 @@ def extract_pr_metadata() -> Optional[PRMetadata]:
         body = pr.get("body") or ""
         username = pr.get("user", {}).get("login")
 
-        # 1. Try parsing full name from PR description: * **Nama Lengkap**: Dimas Dwi Ariyanto
+        # 1. Try parsing full name from PR description: * **Nama Lengkap**: Dyaksa
         name_match = re.search(
             r"\*\*\s*Nama Lengkap\s*\*\*:\s*([^\r\n<]+)", body, re.IGNORECASE
         )
@@ -110,12 +112,12 @@ def extract_pr_metadata() -> Optional[PRMetadata]:
         if name and (name.startswith("(") and name.endswith(")")):
             name = None
 
-        # 2. Fallback to PR title: "Submission Capstone - Dimas Dwi Ariyanto"
+        # 2. Fallback to PR title: "Submission n8n Study Jam - 10121001 - Dyaksa"
         if not name and "-" in title:
-            prefix, _, candidate = title.partition("-")
-            if "submission" in prefix.lower():
-                candidate = candidate.strip()
-                if candidate and not candidate.startswith("<"):
+            parts = [p.strip() for p in title.split("-")]
+            if len(parts) >= 2 and "submission" in parts[0].lower():
+                candidate = parts[-1].strip()
+                if candidate and not candidate.startswith("<") and not candidate.startswith("["):
                     name = candidate
 
         return PRMetadata(name=name, username=username, title=title)
@@ -124,10 +126,32 @@ def extract_pr_metadata() -> Optional[PRMetadata]:
         return None
 
 
+def extract_metadata_from_markdown(path: Path) -> Tuple[Optional[str], Optional[str]]:
+    """Extracts Name and GitHub username directly from a submission .md file."""
+    try:
+        text = path.read_text(encoding="utf-8")
+        name_match = re.search(r"[-*]\s*\*\*Nama Lengkap\*\*:\s*([^\r\n<]+)", text, re.IGNORECASE)
+        name = name_match.group(1).strip() if name_match else None
+        if name and (name.startswith("[") and name.endswith("]")):
+            name = None
+
+        user_match = re.search(r"[-*]\s*\*\*Username GitHub\*\*:\s*([^\r\n<]+)", text, re.IGNORECASE)
+        username = user_match.group(1).strip() if user_match else None
+        if username and (username.startswith("[@username") or "@username-anda" in username):
+            username = None
+
+        return name, username
+    except Exception as err:
+        print(f"Notice: Unable to read markdown {path}: {err}", file=sys.stderr)
+        return None, None
+
+
 def format_name_from_path(path_str: str) -> str:
-    """Converts folder slug (e.g. 'dimas-dwi-ariyanto') into Title Case ('Dimas Dwi Ariyanto')."""
-    folder = Path(path_str).name
-    words = folder.replace("_", "-").split("-")
+    """Converts filename/slug (e.g. '10121001_Dyaksa.md') into Title Case ('Dyaksa')."""
+    stem = Path(path_str).stem
+    # Remove leading NIM if present (digits followed by underscore or dash)
+    stem = re.sub(r"^\d+[-_]", "", stem)
+    words = stem.replace("_", "-").split("-")
     return " ".join(word.capitalize() for word in words if word)
 
 
@@ -141,8 +165,9 @@ def extract_username_from_url(url: str) -> str:
 
 TABLE_HEADER_REGEX = re.compile(
     r"(\|[\t ]*No[\t ]*\|[\t ]*Nama Lengkap[\t ]*\|[\t ]*Username GitHub[\t ]*\|"
-    r"[\t ]*Path Submodule[\t ]*\|[\t ]*Status Verifikasi[\t ]*\|[\t ]*\n"
-    r"\|[ \-:\t|]+\|[\t ]*\n)"
+    r"[\t ]*(?:Berkas Submission|Path Submodule|Path Submission)[\t ]*\|[\t ]*Status Verifikasi[\t ]*\|[\t ]*\n"
+    r"\|[ \-:\t|]+\|[\t ]*\n)",
+    re.IGNORECASE,
 )
 
 
@@ -181,7 +206,7 @@ def parse_contributors_markdown(
             )
 
             # Ignore placeholder template rows
-            if "Nama Kamu" in name or "(Nomor)" in no:
+            if "Nama Kamu" in name or "(Nomor)" in no or "Nama Lengkap Anda" in name:
                 continue
 
             path_match = re.search(r"\[([^\]]+)\]", path_raw)
@@ -203,7 +228,7 @@ def parse_contributors_markdown(
 # Main Synchronization Logic
 
 def sync_contributors(root: Path) -> bool:
-    """Synchronizes CONTRIBUTORS.md with submodules and directory entries."""
+    """Synchronizes CONTRIBUTORS.md with submission markdown files and directories."""
     gitmodules_path = root / ".gitmodules"
     contributors_path = root / "CONTRIBUTORS.md"
 
@@ -215,10 +240,49 @@ def sync_contributors(root: Path) -> bool:
     prefix, entries, suffix = parse_contributors_markdown(content)
 
     registered_paths: Set[str] = {entry.path for entry in entries}
-    submodules = parse_gitmodules(gitmodules_path)
     pr_meta = extract_pr_metadata()
 
-    # 1. Process git submodules defined in .gitmodules
+    # 1. Scan submissions/ directory for .md submission files and folders
+    submissions_dir = root / "submissions"
+    if submissions_dir.is_dir():
+        for item in sorted(submissions_dir.iterdir()):
+            if item.name.startswith("."):
+                continue
+
+            sub_path = f"submissions/{item.name}"
+            if sub_path in registered_paths:
+                continue
+
+            name: Optional[str] = None
+            username: Optional[str] = None
+
+            if item.is_file() and item.suffix.lower() == ".md":
+                md_name, md_user = extract_metadata_from_markdown(item)
+                name = md_name
+                username = md_user
+
+            if not name and pr_meta and pr_meta.name:
+                name = pr_meta.name
+            if not name:
+                name = format_name_from_path(sub_path)
+
+            if not username and pr_meta and pr_meta.username:
+                username = pr_meta.username
+            if not username:
+                username = "-"
+
+            entries.append(
+                Contributor(
+                    name=name,
+                    username=username,
+                    path=sub_path,
+                    status="Verified",
+                )
+            )
+            registered_paths.add(sub_path)
+
+    # 2. Process git submodules defined in .gitmodules (if any remain)
+    submodules = parse_gitmodules(gitmodules_path)
     for sub_name, props in submodules.items():
         sub_path = props.get("path", sub_name)
         if sub_path in registered_paths:
@@ -245,29 +309,6 @@ def sync_contributors(root: Path) -> bool:
             )
         )
         registered_paths.add(sub_path)
-
-    # 2. Scan submissions/ directory for any submodule folder added without .gitmodules
-    submissions_dir = root / "submissions"
-    if submissions_dir.is_dir():
-        for item in sorted(submissions_dir.iterdir()):
-            if item.is_dir() and item.name != ".git":
-                sub_path = f"submissions/{item.name}"
-                if sub_path not in registered_paths:
-                    name = (
-                        pr_meta.name
-                        if (pr_meta and pr_meta.name)
-                        else format_name_from_path(sub_path)
-                    )
-                    username = pr_meta.username if pr_meta else ""
-                    entries.append(
-                        Contributor(
-                            name=name,
-                            username=username,
-                            path=sub_path,
-                            status="Verified",
-                        )
-                    )
-                    registered_paths.add(sub_path)
 
     # 3. Build formatted markdown output
     rows = [
